@@ -1,3 +1,4 @@
+using System.IO;
 using UnityEditor.SettingsManagement;
 using UnityEngine.ProBuilder;
 
@@ -5,17 +6,8 @@ namespace UnityEditor.ProBuilder
 {
     static class ProBuilderSettings
     {
-        [InitializeOnLoadMethod]
-        static void SaveSettingsOnExit()
-        {
-            EditorApplication.quitting += () =>
-            {
-                Log.Info("Saving on quit");
-                Save();
-            };
-        }
-
-        internal const string k_DefaultSettingsPath = "ProjectSettings/ProBuilderSettings.json";
+        internal const string k_LegacySettingsPath = "ProjectSettings/ProBuilderSettings.json";
+        const string k_PackageName = "com.unity.probuilder";
 
         static Settings s_Instance;
 
@@ -25,11 +17,8 @@ namespace UnityEditor.ProBuilder
             {
                 if (s_Instance == null)
                 {
-                    s_Instance = new Settings(new ISettingsRepository[]
-                    {
-                        new ProjectSettingsRepository(k_DefaultSettingsPath),
-                        new UserSettingsRepository(),
-                    });
+                    CheckForSettingsInRoot();
+                    s_Instance = new Settings(k_PackageName);
                 }
 
                 return s_Instance;
@@ -59,6 +48,33 @@ namespace UnityEditor.ProBuilder
         public static void Delete<T>(string key, SettingsScope scope = SettingsScope.Project)
         {
             instance.DeleteKey<T>(key, scope);
+        }
+
+        static void CheckForSettingsInRoot()
+        {
+            var path = ProjectSettingsRepository.GetSettingsPath(k_PackageName, "Settings");
+
+            // Only copy old settings if there are not existing settings in the new place. This prevents the situation
+            // where VCS restores an old setting file and overwrites the current (correct) settings.
+            if (!File.Exists(path) && File.Exists(k_LegacySettingsPath))
+            {
+                try
+                {
+                    var dir = Path.GetDirectoryName(path);
+                    Log.Info(k_LegacySettingsPath + " -> " + path);
+                    Directory.CreateDirectory(dir);
+                    File.Move(k_LegacySettingsPath, path);
+                    File.Delete(k_LegacySettingsPath);
+                }
+                catch(System.Exception e)
+                {
+                    Log.Warning(string.Format("Failed moving ProBuilder project settings file. To fix this warning, " +
+                        "either manually move \"{0}\" to \"{1}\", or delete the file.\n\n{2}",
+                        k_LegacySettingsPath,
+                        path,
+                        e.ToString()));
+                }
+            }
         }
     }
 }
