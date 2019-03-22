@@ -52,7 +52,7 @@ namespace UnityEditor.ProBuilder
 
         static void CheckForSettingsInRoot()
         {
-            var path = ProjectSettingsRepository.GetSettingsPath(k_PackageName, "Settings");
+            var path = ProjectSettingsRepository.GetSettingsPath(k_PackageName);
 
             // Only copy old settings if there are not existing settings in the new place. This prevents the situation
             // where VCS restores an old setting file and overwrites the current (correct) settings.
@@ -61,7 +61,6 @@ namespace UnityEditor.ProBuilder
                 try
                 {
                     var dir = Path.GetDirectoryName(path);
-                    Log.Info(k_LegacySettingsPath + " -> " + path);
                     Directory.CreateDirectory(dir);
                     File.Move(k_LegacySettingsPath, path);
                     File.Delete(k_LegacySettingsPath);
