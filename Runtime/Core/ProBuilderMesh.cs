@@ -4,6 +4,7 @@ using System.Linq;
 using UnityEngine.Serialization;
 using System;
 using System.Collections.ObjectModel;
+using UnityEngine.Rendering;
 
 namespace UnityEngine.ProBuilder
 {
@@ -180,6 +181,9 @@ namespace UnityEngine.ProBuilder
             missing |= (channels & MeshArrays.Color) == MeshArrays.Color && (m_Colors == null || m_Colors.Length != vc);
             missing |= (channels & MeshArrays.Tangent) == MeshArrays.Tangent && (m_Tangents == null || m_Tangents.Length != vc);
 
+#if UNITY_2019_3_OR_NEWER
+            missing |= mesh != null && mesh.HasVertexAttribute(VertexAttribute.TexCoord1);
+#else
             // UV2 is a special case. It is not stored in ProBuilderMesh, does not necessarily match the vertex count,
             // at it has a cost to check.
             if ((channels & MeshArrays.Texture1) == MeshArrays.Texture1)
@@ -187,6 +191,7 @@ namespace UnityEngine.ProBuilder
                 var m_Textures1 = mesh != null ? mesh.uv2 : null;
                 missing |= (m_Textures1 == null || m_Textures1.Length < 3);
             }
+#endif
 
             return !missing;
         }
