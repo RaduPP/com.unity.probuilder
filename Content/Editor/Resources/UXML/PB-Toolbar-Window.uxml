@@ -1,0 +1,6 @@
+<ui:UXML xmlns:ui="UnityEngine.UIElements" xmlns:uie="UnityEditor.UIElements">
+	<ui:ScrollView>
+    	<ui:VisualElement name="pb-toolbar" class="pb-toolbar"/>
+    </ui:ScrollView>
+</ui:UXML>
+

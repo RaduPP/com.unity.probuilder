@@ -1,0 +1,390 @@
+.pb-toolbar {
+}
+
+.pb-toolbar-group {
+    flex-wrap: wrap;
+    flex-direction: row;
+    align-items: stretch;
+    justify-content: flex-start;
+}
+
+.pb-icon {
+    width: 16px;
+    height: 16px;
+    justify-content: flex-start;
+    background-image: url('/Packages/com.unity.probuilder/Content/Icons/Toolbar/null.png');
+    -unity-background-scale-mode: scale-to-fit;
+}
+
+.pb-btn {
+    flex-direction: row;
+    margin-left: 2px;
+    margin-right: 2px;
+    margin-top: 2px;
+    padding-left: 2px;
+    padding-right: 2px;
+    padding-top: 2px;
+    padding-bottom: 2px;
+    flex-grow: 1;
+}
+
+.unity-text-element {
+}
+
+.pb-btn-container {
+    flex-direction: row;
+    flex-grow: 1;
+}
+
+.pb-btn-left {
+    border-top-right-radius: 0;
+    border-bottom-right-radius: 0;
+    margin-right: 0;
+}
+
+.pb-btn-right {
+    border-top-left-radius: 0;
+    border-bottom-left-radius: 0;
+    margin-left: 0;
+    border-left-width: 0;
+}
+
+.pb-btn-option {
+    flex-grow: 0;
+    padding-left: 4px;
+    padding-right: 4px;
+    align-items: center;
+    justify-content: center;
+}
+
+.pb-icon-option {
+    background-image: resource('Icons/BevelEdge.png');
+    width: 6px;
+    height: 6px;
+    -unity-background-image-tint-color: rgb(65, 65, 65);
+}
+
+.pb-hideLabel .pb-btn-text {
+    display: none;
+}
+
+.pb-hideOptionsBtn .pb-btn-option {
+    display: none;
+}
+
+.pb-btn-center {
+    border-top-left-radius: 0;
+    border-bottom-left-radius: 0;
+    border-top-right-radius: 0;
+    border-bottom-right-radius: 0;
+}
+
+#CenterPivotToObject .pb-icon-action {
+    background-image: resource('Icons/CenterPivotToObject');
+}
+
+#CenterPivotToElement .pb-icon-action {
+    background-image: resource('Icons/CenterPivotToElement');
+}
+
+#ConformObjectNormals .pb-icon-action {
+    background-image: resource('Icons/ConformObjectNormals');
+}
+
+#ExportObject .pb-icon-action {
+    background-image: resource('Icons/ExportObject');
+}
+
+#FlipObjectNormals .pb-icon-action {
+    background-image: resource('Icons/FlipObjectNormals');
+}
+
+#GenerateUV .pb-icon-action {
+    background-image: resource('Icons/GenerateUV');
+}
+
+#MergeObjects .pb-icon-action {
+    background-image: resource('Icons/MergeObjects');
+}
+
+#MirrorObject .pb-icon-action {
+    background-image: resource('Icons/MirrorObject');
+}
+
+#ProBuilderizeObject .pb-icon-action {
+    background-image: resource('Icons/ProBuilderizeObject');
+}
+
+#ApplyTransform .pb-icon-action {
+    background-image: resource('Icons/ApplyTransform');
+}
+
+#SubdivideObject .pb-icon-action {
+    background-image: resource('Icons/SubdivideObject'); 
+}
+
+#TriangulateObject .pb-icon-action {
+    background-image: resource('Icons/TriangulateObject');
+}
+
+#AlignHandleToSurface .pb-icon-action {
+    background-image: resource('Icons/AlignHandleToSurface');
+}
+
+#SelectHole .pb-icon-action {
+    background-image: resource('Icons/SelectHole');
+}
+
+#SelectEdgeLoop .pb-icon-action {
+    background-image: resource('Icons/SelectEdgeLoop');
+}
+
+#SelectEdgeRing .pb-icon-action {
+    background-image: resource('Icons/SelectEdgeRing');
+}
+
+#BevelEdge .pb-icon-action {
+    background-image: resource('Icons/BevelEdge');
+}
+
+#BridgeEdges .pb-icon-action {
+    background-image: resource('Icons/BridgeEdges');
+}
+
+#ExtrudeEdge .pb-icon-action {
+    background-image: resource('Icons/ExtrudeEdge');
+}
+
+#ConnectEdges .pb-icon-action {
+    background-image: resource('Icons/ConnectEdges');
+}
+
+#SubdivideEdge .pb-icon-action {
+    background-image: resource('Icons/SubdivideEdge');
+}
+
+#InsertEdgeLoop .pb-icon-action {
+    background-image: resource('Icons/InsertEdgeLoop');
+}
+
+#FillHole .pb-icon-action {
+    background-image: resource('Icons/FillHole');
+}
+
+#SelectFaceLoop .pb-icon-action {
+    background-image: resource('Icons/SelectFaceLoop');
+}
+
+#SelectFaceRing .pb-icon-action {
+    background-image: resource('Icons/SelectFaceRing');
+}
+
+#DuplicateFace .pb-icon-action {
+    background-image: resource('Icons/DuplicateFace');
+}
+
+#BreakFaceSmoothing .pb-icon-action {
+    background-image: resource('Icons/BreakFaceSmoothing');
+}
+
+#ConformFaceNormals .pb-icon-action {
+    background-image: resource('Icons/ConformFaceNormals');
+}
+
+#DeleteFace .pb-icon-action {
+    background-image: resource('Icons/DeleteFace');
+}
+
+#DetachFace .pb-icon-action {
+    background-image: resource('Icons/DetachFace');
+}
+
+#ExtrudeFacesBySurface .pb-icon-action {
+    background-image: resource('Icons/ExtrudeFacesBySurface');
+}
+
+#ExtrudeFacesByVertex .pb-icon-action {
+    background-image: resource('Icons/ExtrudeFacesByVertex');
+}
+
+#ExtrudeFacesIndividually .pb-icon-action {
+    background-image: resource('Icons/ExtrudeFacesIndividually');
+}
+
+#FlipFaceNormal .pb-icon-action {
+    background-image: resource('Icons/FlipFaceNormal');
+}
+
+#FlipQuadTris .pb-icon-action {
+    background-image: resource('Icons/FlipQuadTris');
+}
+
+#MergeFaces .pb-icon-action {
+    background-image: resource('Icons/MergeFaces');
+}
+
+#SubdivideFace .pb-icon-action {
+    background-image: resource('Icons/SubdivideFace');
+}
+
+#TriangulateFace .pb-icon-action {
+    background-image: resource('Icons/TriangulateFace');
+}
+
+#OffsetElements .pb-icon-action {
+    background-image: resource('Icons/OffsetElements');
+}
+
+#SelectHiddenOn .pb-icon-action {
+    background-image: resource('Icons/SelectHiddenOn');
+}
+
+#EdgeMode .pb-icon-action {
+    background-image: resource('Icons/EdgeMode');
+}
+
+#EdgeModeEdgeMode .pb-icon-action {
+    background-image: resource('Icons/FaceMode');
+}
+
+#ObjectMode .pb-icon-action {
+    background-image: resource('Icons/ObjectMode');
+}
+
+#VertexMode .pb-icon-action {
+    background-image: resource('Icons/VertexMode');
+}
+
+#CreateBezierShape .pb-icon-action {
+    background-image: resource('Icons/CreateBezierShape');
+}
+
+#CreatePolyShape .pb-icon-action {
+    background-image: resource('Icons/CreatePolyShape');
+}
+
+#ShapePanel .pb-icon-action {
+    background-image: resource('Icons/ShapePanel');
+}
+
+#MaterialPanel .pb-icon-action {
+    background-image: resource('Icons/MaterialPanel');
+}
+
+#SmoothingPanel .pb-icon-action {
+    background-image: resource('Icons/SmoothingPanel');
+}
+
+#UVEditorPanel .pb-icon-action {
+    background-image: resource('Icons/UVEditorPanel');
+}
+
+#VertexColorPanel .pb-icon-action {
+    background-image: resource('Icons/VertexColorPanel');
+}
+
+#DragSelectComplete .pb-icon-action {
+    background-image: resource('Icons/DragSelectComplete');
+}
+
+#DragSelectIntersect .pb-icon-action {
+    background-image: resource('Icons/DragSelectIntersect');
+}
+
+#GrowSelection .pb-icon-action {
+    background-image: resource('Icons/GrowSelection');
+}
+
+#InvertSelection .pb-icon-action {
+    background-image: resource('Icons/InvertSelection');
+}
+
+#ShrinkSelection .pb-icon-action {
+    background-image: resource('Icons/ShrinkSelection');
+}
+
+#SelectByVertexColor .pb-icon-action {
+    background-image: resource('Icons/SelectByVertexColor');
+}
+
+#SelectByMaterial .pb-icon-action {
+    background-image: resource('Icons/SelectByMaterial');
+}
+
+#SelectBySmoothingGroup .pb-icon-action {
+    background-image: resource('Icons/SelectBySmoothingGroup');
+}
+
+#ShiftAdd .pb-icon-action {
+    background-image: resource('Icons/ShiftAdd');
+}
+
+#ShiftInvert .pb-icon-action {
+    background-image: resource('Icons/ShiftInvert');
+}
+
+#ShiftSubtract .pb-icon-action {
+    background-image: resource('Icons/ShiftSubtract');
+}
+
+#CollapseVerts .pb-icon-action {
+    background-image: resource('Icons/CollapseVerts');
+}
+
+#ConnectVerts .pb-icon-action {
+    background-image: resource('Icons/ConnectVerts');
+}
+
+#SplitVert .pb-icon-action {
+    background-image: resource('Icons/SplitVert');
+}
+
+#WeldVerts .pb-icon-action {
+    background-image: resource('Icons/WeldVerts');
+}
+
+#SceneManipUVsOn .pb-icon-action {
+    background-image: resource('Icons/SceneManipUVsOn');
+}
+
+#SceneManipUVsOff .pb-icon-action {
+    background-image: resource('Icons/SceneManipUVsOff');
+}
+
+#ShowTexturePreviewOn .pb-icon-action {
+    background-image: resource('Icons/ShowTexturePreviewOn');
+}
+
+#ShowTexturePreviewOff .pb-icon-action {
+    background-image: resource('Icons/ShowTexturePreviewOff');
+}
+
+.pb-icon-action {
+}
+
+.pb-btn-openEditor .pb-btn-action {
+    border-left-width: 2px;
+    border-left-color: rgba(248, 140, 18, 255);
+}
+
+.pb-btn-objectAction .pb-btn-action {
+    border-left-width: 2px;
+    border-left-color: rgba(18, 188, 0, 255);
+}
+
+.pb-btn-geoAction .pb-btn-action {
+    border-left-color: rgba(217, 0, 0, 255);
+    border-left-width: 2px;
+}
+
+.pb-btn-selectionAction .pb-btn-action {
+    border-left-width: 2px;
+    border-left-color: rgba(0, 144, 255, 255);
+}
+
+.pb-hideLabel .pb-btn-action {
+    justify-content: center;
+}
+
+.pb-btn-action {
+}

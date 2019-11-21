@@ -1,3 +1,4 @@
+using System;
 using UnityEngine;
 using UnityEditor;
 using System.Collections;
@@ -5,6 +6,8 @@ using System.Collections.Generic;
 using System.Linq;
 using UnityEngine.ProBuilder;
 using UnityEditor.SettingsManagement;
+using UnityEngine.Assertions;
+using UnityEngine.UIElements;
 
 namespace UnityEditor.ProBuilder
 {
@@ -83,6 +86,53 @@ namespace UnityEditor.ProBuilder
             // situations where one gets updated over the other and it's all
             // screwy.  script reloads in particular?
             MenuActionStyles.ResetStyles();
+        }
+
+        public void PopulateRoot(VisualElement root)
+        {
+            Resources.Load<VisualTreeAsset>("UXML/PB-Toolbar-Window").CloneTree(root);
+            root.StretchToParentSize();
+            root.styleSheets.Add(Resources.Load<StyleSheet>("StyleSheets/PB-ToolbarCommon"));
+
+            var toolbar = root.Q<VisualElement>("pb-toolbar");
+            Assert.IsNotNull(toolbar, "Couldn't find the pb-toolbar object in the window uxml.");
+            PopulateToolbar(toolbar, EditorToolbarLoader.GetActions(true)); 
+        }
+
+        void PopulateToolbar(VisualElement root, List<MenuAction> actions)
+        {
+            VisualTreeAsset actionTemplate = Resources.Load<VisualTreeAsset>("UXML/PB-Toolbar-Action");
+
+            var groupCount = Enum.GetNames(typeof(ToolbarGroup)).Length;
+            for (var i = 0; i < groupCount; ++i)
+            {
+                ToolbarGroup group = (ToolbarGroup) i;
+                VisualElement groupElement = new VisualElement {name = group.ToString()};
+                groupElement.AddToClassList("pb-toolbar-group");
+                root.Add(groupElement);
+
+                foreach (var action in actions)
+                {
+                    if (action.group == group)
+                    {
+                        VisualElement actionElement = new VisualElement();
+                        actionElement.AddToClassList("pb-btn-container");
+                        groupElement.Add(actionElement);
+                        actionElement.name = action.menuTitle.Replace(" ", "");
+
+                        actionTemplate.CloneTree(actionElement);
+
+                        Button button = actionElement.Q<Button>("btn-action");
+                        button.clickable.clicked += () =>
+                        {
+                            ActionResult result = action.DoAction();
+                            EditorUtility.ShowNotification(result.notification);
+                        };
+
+                        button.Q<Label>().text = action.menuTitle;
+                    }
+                }
+            }
         }
 
         void OnElementSelectionChange(IEnumerable<ProBuilderMesh> selection)
@@ -217,221 +267,221 @@ namespace UnityEditor.ProBuilder
             return !action.hidden && (!isIconMode || action.icon != null);
         }
 
-        public void OnGUI()
-        {
-            Event e = Event.current;
-            Vector2 mpos = e.mousePosition;
-            bool forceRepaint = false;
+        //public void OnGUI()
+        //{
+        //    Event e = Event.current;
+        //    Vector2 mpos = e.mousePosition;
+        //    bool forceRepaint = false;
 
-            // if icon mode and no actions are found, that probably means icons failed to load. revert to text mode.
-            int menuActionsCount = 0;
+        //    // if icon mode and no actions are found, that probably means icons failed to load. revert to text mode.
+        //    int menuActionsCount = 0;
 
-            for (int i = 0; i < m_Actions.Count; i++)
-                if (IsActionValid(m_Actions[i]))
-                    menuActionsCount++;
+        //    for (int i = 0; i < m_Actions.Count; i++)
+        //        if (IsActionValid(m_Actions[i]))
+        //            menuActionsCount++;
 
-            if (isIconMode && menuActionsCount < 1)
-            {
-                isIconMode = false;
-                ProBuilderEditor.s_IsIconGui.value = isIconMode;
-                CalculateMaxIconSize();
-                Debug.LogWarning("ProBuilder: Toolbar icons failed to load, reverting to text mode.  Please ensure that the ProBuilder folder contents are unmodified.  If the menu is still not visible, try closing and re-opening the Editor Window.");
-                return;
-            }
+        //    if (isIconMode && menuActionsCount < 1)
+        //    {
+        //        isIconMode = false;
+        //        ProBuilderEditor.s_IsIconGui.value = isIconMode;
+        //        CalculateMaxIconSize();
+        //        Debug.LogWarning("ProBuilder: Toolbar icons failed to load, reverting to text mode.  Please ensure that the ProBuilder folder contents are unmodified.  If the menu is still not visible, try closing and re-opening the Editor Window.");
+        //        return;
+        //    }
 
-            int availableWidth = windowWidth;
-            int availableHeight = windowHeight;
-            bool isHorizontal = windowWidth > windowHeight * 2;
+        //    int availableWidth = windowWidth;
+        //    int availableHeight = windowHeight;
+        //    bool isHorizontal = windowWidth > windowHeight * 2;
 
-            if (m_IsHorizontalMenu != isHorizontal || m_Rows < 1 || m_Columns < 1)
-                CalculateMaxIconSize();
+        //    if (m_IsHorizontalMenu != isHorizontal || m_Rows < 1 || m_Columns < 1)
+        //        CalculateMaxIconSize();
 
-            if (e.type == EventType.Layout)
-            {
-                if (isHorizontal)
-                {
-                    m_Rows = ((windowHeight - 4) / m_ContentHeight);
-                    m_Columns = System.Math.Max(windowWidth / m_ContentWidth, (menuActionsCount / m_Rows) + (menuActionsCount % m_Rows != 0 ? 1 : 0));
-                }
-                else
-                {
-                    m_Columns = System.Math.Max((windowWidth - 4) / m_ContentWidth, 1);
-                    m_Rows = (menuActionsCount / m_Columns) + (menuActionsCount % m_Columns != 0 ? 1 : 0);
-                }
-            }
+        //    if (e.type == EventType.Layout)
+        //    {
+        //        if (isHorizontal)
+        //        {
+        //            m_Rows = ((windowHeight - 4) / m_ContentHeight);
+        //            m_Columns = System.Math.Max(windowWidth / m_ContentWidth, (menuActionsCount / m_Rows) + (menuActionsCount % m_Rows != 0 ? 1 : 0));
+        //        }
+        //        else
+        //        {
+        //            m_Columns = System.Math.Max((windowWidth - 4) / m_ContentWidth, 1);
+        //            m_Rows = (menuActionsCount / m_Columns) + (menuActionsCount % m_Columns != 0 ? 1 : 0);
+        //        }
+        //    }
 
-            // happens when maximizing/unmaximizing the window
-            if (m_Rows < 1 || m_Columns < 1)
-                return;
+        //    // happens when maximizing/unmaximizing the window
+        //    if (m_Rows < 1 || m_Columns < 1)
+        //        return;
 
-            int contentWidth = (menuActionsCount / m_Rows) * m_ContentWidth + 4;
-            int contentHeight = m_Rows * m_ContentHeight + 4;
+        //    int contentWidth = (menuActionsCount / m_Rows) * m_ContentWidth + 4;
+        //    int contentHeight = m_Rows * m_ContentHeight + 4;
 
-            bool showScrollButtons = isHorizontal ? contentWidth > availableWidth : contentHeight > availableHeight;
+        //    bool showScrollButtons = isHorizontal ? contentWidth > availableWidth : contentHeight > availableHeight;
 
-            if (showScrollButtons)
-            {
-                availableHeight -= SCROLL_BTN_SIZE * 2;
-                availableWidth -= SCROLL_BTN_SIZE * 2;
-            }
+        //    if (showScrollButtons)
+        //    {
+        //        availableHeight -= SCROLL_BTN_SIZE * 2;
+        //        availableWidth -= SCROLL_BTN_SIZE * 2;
+        //    }
 
-            if (isHorizontal && e.type == EventType.ScrollWheel && e.delta.sqrMagnitude > .001f)
-            {
-                m_Scroll.value = new Vector2(m_Scroll.value.x + e.delta.y * 10f, m_Scroll.value.y);
-                forceRepaint = true;
-            }
+        //    if (isHorizontal && e.type == EventType.ScrollWheel && e.delta.sqrMagnitude > .001f)
+        //    {
+        //        m_Scroll.value = new Vector2(m_Scroll.value.x + e.delta.y * 10f, m_Scroll.value.y);
+        //        forceRepaint = true;
+        //    }
 
-            // the math for matching layout group width for icons is easy enough, but text
-            // is a lot more complex.  so for horizontal text toolbars always show the horizontal
-            // scroll buttons.
-            int maxHorizontalScroll = !isIconMode ? 10000 : contentWidth - availableWidth;
-            int maxVerticalScroll = contentHeight - availableHeight;
+        //    // the math for matching layout group width for icons is easy enough, but text
+        //    // is a lot more complex.  so for horizontal text toolbars always show the horizontal
+        //    // scroll buttons.
+        //    int maxHorizontalScroll = !isIconMode ? 10000 : contentWidth - availableWidth;
+        //    int maxVerticalScroll = contentHeight - availableHeight;
 
-            // only change before a layout event
-            if (m_ShowScrollButtons != showScrollButtons && e.type == EventType.Layout)
-                m_ShowScrollButtons = showScrollButtons;
+        //    // only change before a layout event
+        //    if (m_ShowScrollButtons != showScrollButtons && e.type == EventType.Layout)
+        //        m_ShowScrollButtons = showScrollButtons;
 
-            if (m_ShowScrollButtons)
-            {
-                if (isHorizontal)
-                {
-                    GUILayout.BeginHorizontal();
+        //    if (m_ShowScrollButtons)
+        //    {
+        //        if (isHorizontal)
+        //        {
+        //            GUILayout.BeginHorizontal();
 
-                    GUI.enabled = ((Vector2)m_Scroll).x > 0;
+        //            GUI.enabled = ((Vector2)m_Scroll).x > 0;
 
-                    if (GUILayout.Button(scrollIconLeft, UI.EditorGUIUtility.ButtonNoBackgroundSmallMarginStyle, GUILayout.ExpandHeight(true)))
-                        StartScrollAnimation(Mathf.Max(((Vector2)m_Scroll).x - availableWidth, 0f), 0f);
+        //            if (GUILayout.Button(scrollIconLeft, UI.EditorGUIUtility.ButtonNoBackgroundSmallMarginStyle, GUILayout.ExpandHeight(true)))
+        //                StartScrollAnimation(Mathf.Max(((Vector2)m_Scroll).x - availableWidth, 0f), 0f);
 
-                    GUI.enabled = true;
-                }
-                else
-                {
-                    GUI.enabled = ((Vector2)m_Scroll).y > 0;
+        //            GUI.enabled = true;
+        //        }
+        //        else
+        //        {
+        //            GUI.enabled = ((Vector2)m_Scroll).y > 0;
 
-                    if (GUILayout.Button(scrollIconUp, UI.EditorGUIUtility.ButtonNoBackgroundSmallMarginStyle))
-                        StartScrollAnimation(0f, Mathf.Max(((Vector2)m_Scroll).y - availableHeight, 0f));
+        //            if (GUILayout.Button(scrollIconUp, UI.EditorGUIUtility.ButtonNoBackgroundSmallMarginStyle))
+        //                StartScrollAnimation(0f, Mathf.Max(((Vector2)m_Scroll).y - availableHeight, 0f));
 
-                    GUI.enabled = true;
-                }
-            }
+        //            GUI.enabled = true;
+        //        }
+        //    }
 
-            m_Scroll.value = GUILayout.BeginScrollView(m_Scroll.value, false, false, GUIStyle.none, GUIStyle.none, GUIStyle.none);
+        //    m_Scroll.value = GUILayout.BeginScrollView(m_Scroll.value, false, false, GUIStyle.none, GUIStyle.none, GUIStyle.none);
 
-            bool    tooltipShown = false,
-                    hovering = false;
+        //    bool    tooltipShown = false,
+        //            hovering = false;
 
-            Rect optionRect = new Rect(0f, 0f, 0f, 0f);
+        //    Rect optionRect = new Rect(0f, 0f, 0f, 0f);
 
-            GUILayout.BeginHorizontal();
+        //    GUILayout.BeginHorizontal();
 
-            // e.mousePosition != mpos at this point - @todo figure out why
-            bool windowContainsMouse =  window == EditorWindow.mouseOverWindow
-                && mpos.x > 0 && mpos.x < window.position.width &&
-                mpos.y > 0 && mpos.y < window.position.height;
+        //    // e.mousePosition != mpos at this point - @todo figure out why
+        //    bool windowContainsMouse =  window == EditorWindow.mouseOverWindow
+        //        && mpos.x > 0 && mpos.x < window.position.width &&
+        //        mpos.y > 0 && mpos.y < window.position.height;
 
-            int columnCount = 0;
+        //    int columnCount = 0;
 
-            for (int actionIndex = 0; actionIndex < m_ActionsLength; actionIndex++)
-            {
-                MenuAction action = m_Actions[actionIndex];
+        //    for (int actionIndex = 0; actionIndex < m_ActionsLength; actionIndex++)
+        //    {
+        //        MenuAction action = m_Actions[actionIndex];
 
-                if (!IsActionValid(action))
-                    continue;
+        //        if (!IsActionValid(action))
+        //            continue;
 
-                if (isIconMode)
-                {
-                    if (action.DoButton(isHorizontal, e.alt, ref optionRect, GUILayout.MaxHeight(m_ContentHeight + 12)) && !e.shift)
-                    {
-                        // test for alt click / hover
-                        optionRect.x -= m_Scroll.value.x;
-                        optionRect.y -= m_Scroll.value.y;
+        //        if (isIconMode)
+        //        {
+        //            if (action.DoButton(isHorizontal, e.alt, ref optionRect, GUILayout.MaxHeight(m_ContentHeight + 12)) && !e.shift)
+        //            {
+        //                // test for alt click / hover
+        //                optionRect.x -= m_Scroll.value.x;
+        //                optionRect.y -= m_Scroll.value.y;
 
-                        if (windowContainsMouse &&
-                            e.type != EventType.Layout &&
-                            optionRect.Contains(e.mousePosition))
-                        {
-                            hoveringTooltipName = action.tooltip.title + "_alt";
-                            tooltipTimerRefresh = .5f;
-                            hovering = true;
+        //                if (windowContainsMouse &&
+        //                    e.type != EventType.Layout &&
+        //                    optionRect.Contains(e.mousePosition))
+        //                {
+        //                    hoveringTooltipName = action.tooltip.title + "_alt";
+        //                    tooltipTimerRefresh = .5f;
+        //                    hovering = true;
 
-                            if (showTooltipTimer)
-                            {
-                                tooltipShown = true;
-                                ShowTooltip(optionRect, "Alt + Click for Options ", m_Scroll);
-                            }
-                        }
-                    }
-                }
-                else
-                {
-                    if (m_Columns < 2)
-                        action.DoButton(isHorizontal, e.alt, ref optionRect);
-                    else
-                        action.DoButton(isHorizontal, e.alt, ref optionRect, GUILayout.MinWidth(m_ContentWidth));
-                }
+        //                    if (showTooltipTimer)
+        //                    {
+        //                        tooltipShown = true;
+        //                        ShowTooltip(optionRect, "Alt + Click for Options ", m_Scroll);
+        //                    }
+        //                }
+        //            }
+        //        }
+        //        else
+        //        {
+        //            if (m_Columns < 2)
+        //                action.DoButton(isHorizontal, e.alt, ref optionRect);
+        //            else
+        //                action.DoButton(isHorizontal, e.alt, ref optionRect, GUILayout.MinWidth(m_ContentWidth));
+        //        }
 
-                Rect buttonRect = GUILayoutUtility.GetLastRect();
+        //        Rect buttonRect = GUILayoutUtility.GetLastRect();
 
-                if (windowContainsMouse &&
-                    e.type != EventType.Layout &&
-                    !hovering &&
-                    buttonRect.Contains(e.mousePosition))
-                {
-                    hoveringTooltipName = action.tooltip.title;
-                    tooltipTimerRefresh = 1f;
+        //        if (windowContainsMouse &&
+        //            e.type != EventType.Layout &&
+        //            !hovering &&
+        //            buttonRect.Contains(e.mousePosition))
+        //        {
+        //            hoveringTooltipName = action.tooltip.title;
+        //            tooltipTimerRefresh = 1f;
 
-                    if (e.shift || showTooltipTimer)
-                    {
-                        tooltipShown = true;
-                        ShowTooltip(buttonRect, action.tooltip, m_Scroll);
-                    }
+        //            if (e.shift || showTooltipTimer)
+        //            {
+        //                tooltipShown = true;
+        //                ShowTooltip(buttonRect, action.tooltip, m_Scroll);
+        //            }
 
-                    hovering = true;
-                    forceRepaint = true;
-                }
+        //            hovering = true;
+        //            forceRepaint = true;
+        //        }
 
-                if (++columnCount >= m_Columns)
-                {
-                    columnCount = 0;
+        //        if (++columnCount >= m_Columns)
+        //        {
+        //            columnCount = 0;
 
-                    GUILayout.EndHorizontal();
-                    GUILayout.BeginHorizontal();
-                }
-            }
+        //            GUILayout.EndHorizontal();
+        //            GUILayout.BeginHorizontal();
+        //        }
+        //    }
 
-            GUILayout.FlexibleSpace();
-            GUILayout.EndHorizontal();
+        //    GUILayout.FlexibleSpace();
+        //    GUILayout.EndHorizontal();
 
-            GUILayout.EndScrollView();
+        //    GUILayout.EndScrollView();
 
-            if (m_ShowScrollButtons)
-            {
-                if (isHorizontal)
-                {
-                    GUI.enabled = m_Scroll.value.x < maxHorizontalScroll - 2;
-                    if (GUILayout.Button(scrollIconRight, UI.EditorGUIUtility.ButtonNoBackgroundSmallMarginStyle, GUILayout.ExpandHeight(true)))
-                        StartScrollAnimation(Mathf.Min(m_Scroll.value.x + availableWidth + 2, maxHorizontalScroll), 0f);
-                    GUI.enabled = true;
+        //    if (m_ShowScrollButtons)
+        //    {
+        //        if (isHorizontal)
+        //        {
+        //            GUI.enabled = m_Scroll.value.x < maxHorizontalScroll - 2;
+        //            if (GUILayout.Button(scrollIconRight, UI.EditorGUIUtility.ButtonNoBackgroundSmallMarginStyle, GUILayout.ExpandHeight(true)))
+        //                StartScrollAnimation(Mathf.Min(m_Scroll.value.x + availableWidth + 2, maxHorizontalScroll), 0f);
+        //            GUI.enabled = true;
 
-                    GUILayout.EndHorizontal();
-                }
-                else
-                {
-                    GUI.enabled = m_Scroll.value.y < maxVerticalScroll - 2;
-                    if (GUILayout.Button(scrollIconDown, UI.EditorGUIUtility.ButtonNoBackgroundSmallMarginStyle))
-                        StartScrollAnimation(0f, Mathf.Min(m_Scroll.value.y + availableHeight + 2, maxVerticalScroll));
-                    GUI.enabled = true;
-                }
-            }
+        //            GUILayout.EndHorizontal();
+        //        }
+        //        else
+        //        {
+        //            GUI.enabled = m_Scroll.value.y < maxVerticalScroll - 2;
+        //            if (GUILayout.Button(scrollIconDown, UI.EditorGUIUtility.ButtonNoBackgroundSmallMarginStyle))
+        //                StartScrollAnimation(0f, Mathf.Min(m_Scroll.value.y + availableHeight + 2, maxVerticalScroll));
+        //            GUI.enabled = true;
+        //        }
+        //    }
 
-            if ((e.type == EventType.Repaint || e.type == EventType.MouseMove) && !tooltipShown)
-                TooltipEditor.Hide();
+        //    if ((e.type == EventType.Repaint || e.type == EventType.MouseMove) && !tooltipShown)
+        //        TooltipEditor.Hide();
 
-            if (e.type != EventType.Layout && !hovering)
-                tooltipTimer.item1 = "";
+        //    if (e.type != EventType.Layout && !hovering)
+        //        tooltipTimer.item1 = "";
 
-            if (forceRepaint || (EditorWindow.mouseOverWindow == this && e.delta.sqrMagnitude > .001f) || e.isMouse)
-                window.Repaint();
-        }
+        //    if (forceRepaint || (EditorWindow.mouseOverWindow == this && e.delta.sqrMagnitude > .001f) || e.isMouse)
+        //        window.Repaint();
+        //}
     }
 }

@@ -1,0 +1,9 @@
+<ui:UXML xmlns:ui="UnityEngine.UIElements" xmlns:uie="UnityEditor.UIElements">
+    <ui:Button name="btn-action" class="pb-btn">
+        <ui:VisualElement name="icon" class="pb-icon pb-icon-action" />
+        <ui:Label name="label" class="pb-btn-text" />
+    </ui:Button>
+    <ui:Button name="btn-options" class="pb-btn pb-btn-right pb-btn-option">
+        <ui:VisualElement name="icon" class="pb-icon-option pb-icon" />
+    </ui:Button>
+</ui:UXML>

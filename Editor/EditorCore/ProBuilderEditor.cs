@@ -471,11 +471,7 @@ namespace UnityEditor.ProBuilder
 #endif
             }
 
-            if (s_EditorToolbar != null)
-            {
-                s_EditorToolbar.OnGUI();
-            }
-            else
+            if (s_EditorToolbar == null)
             {
                 try
                 {
@@ -496,6 +492,7 @@ namespace UnityEditor.ProBuilder
             s_EditorToolbar = ScriptableObject.CreateInstance<EditorToolbar>();
             s_EditorToolbar.hideFlags = HideFlags.HideAndDontSave;
             s_EditorToolbar.InitWindowProperties(this);
+            s_EditorToolbar.PopulateRoot(rootVisualElement);
         }
 
         void IconModeChanged()
