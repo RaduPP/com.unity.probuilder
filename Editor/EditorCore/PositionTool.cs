@@ -1,4 +1,4 @@
-//#define DEBUG_HANDLES
+#define DEBUG_HANDLES
 
 using System.Linq;
 using UnityEditor.SettingsManagement;

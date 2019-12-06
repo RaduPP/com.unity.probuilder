@@ -1,3 +1,5 @@
+//#define PROBUILDER_ENABLE_TRANSFORM_ORIGIN_GIZMO
+
 using UnityEngine;
 using UnityEngine.ProBuilder;
 
@@ -197,7 +199,7 @@ namespace UnityEditor.ProBuilder
         {
             if (isEditing && currentEvent.type == EventType.Repaint)
             {
-                foreach (var key in meshAndElementGroupPairs)
+                foreach (var key in elementSelection)
                 {
                     foreach (var group in key.elementGroups)
                     {

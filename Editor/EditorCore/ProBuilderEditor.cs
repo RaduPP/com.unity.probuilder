@@ -72,11 +72,13 @@ namespace UnityEditor.ProBuilder
         const float k_PickingDistance = 40f;
 
         static Pref<bool> s_WindowIsFloating = new Pref<bool>("UnityEngine.ProBuilder.ProBuilderEditor-isUtilityWindow", false, SettingsScope.Project);
+        // todo REMOVE
         static Pref<bool> m_BackfaceSelectEnabled = new Pref<bool>("editor.backFaceSelectEnabled", false);
         static Pref<RectSelectMode> m_DragSelectRectMode = new Pref<RectSelectMode>("editor.dragSelectRectMode", RectSelectMode.Partial);
         static Pref<SelectionModifierBehavior> m_SelectModifierBehavior = new Pref<SelectionModifierBehavior>("editor.rectSelectModifier", SelectionModifierBehavior.Difference);
         static Pref<SelectMode> s_SelectMode = new Pref<SelectMode>("editor.selectMode", SelectMode.Object);
 
+        // todo MOVE TO SelectionTool
         internal static RectSelectMode rectSelectMode
         {
             get { return m_DragSelectRectMode.value; }
@@ -88,11 +90,12 @@ namespace UnityEditor.ProBuilder
 
                 m_DragSelectRectMode.SetValue(value, true);
 
-                if (s_Instance != null)
-                    s_Instance.m_ScenePickerPreferences.rectSelectMode = value;
+//                if (s_Instance != null)
+//                    s_Instance.m_ScenePickerPreferences.rectSelectMode = value;
             }
         }
 
+        // todo MOVE TO SelectionTool
         internal static SelectionModifierBehavior selectionModifierBehavior
         {
             get { return m_SelectModifierBehavior.value; }
@@ -104,11 +107,12 @@ namespace UnityEditor.ProBuilder
 
                 m_SelectModifierBehavior.SetValue(value, true);
 
-                if (s_Instance != null)
-                    s_Instance.m_ScenePickerPreferences.selectionModifierBehavior = value;
+//                if (s_Instance != null)
+//                    s_Instance.m_ScenePickerPreferences.selectionModifierBehavior = value;
             }
         }
 
+        // todo MOVE TO SelectionTool
         internal static bool backfaceSelectionEnabled
         {
             get { return m_BackfaceSelectEnabled.value; }
@@ -120,8 +124,8 @@ namespace UnityEditor.ProBuilder
 
                 m_BackfaceSelectEnabled.SetValue(value, true);
 
-                if(s_Instance != null)
-                    s_Instance.m_ScenePickerPreferences.cullMode = value ? CullingMode.None : CullingMode.Back;
+//                if(s_Instance != null)
+//                    s_Instance.m_ScenePickerPreferences.cullMode = value ? CullingMode.None : CullingMode.Back;
             }
         }
 
@@ -136,12 +140,6 @@ namespace UnityEditor.ProBuilder
         Rect m_ElementModeToolbarRect = new Rect(3, 6, 128, 24);
 
         int m_DefaultControl;
-        SceneSelection m_Hovering = new SceneSelection();
-        SceneSelection m_HoveringPrevious = new SceneSelection();
-        ScenePickerPreferences m_ScenePickerPreferences;
-
-        [UserSetting("Graphics", "Show Hover Highlight", "Highlight the mesh element nearest to the mouse cursor.")]
-        static Pref<bool> s_ShowHoverHighlight = new Pref<bool>("editor.showPreselectionHighlight", true, SettingsScope.User);
 
         Tool m_CurrentTool = Tool.Move;
         Vector2 m_InitialMousePosition;
@@ -396,14 +394,14 @@ namespace UnityEditor.ProBuilder
         {
             EditorMeshHandles.ResetPreferences();
 
-            m_ScenePickerPreferences = new ScenePickerPreferences()
-            {
-                offPointerMultiplier = k_PickingDistance * k_OffPointerMultiplierPercent,
-                maxPointerDistance = k_PickingDistance,
-                cullMode = m_BackfaceSelectEnabled ? CullingMode.None : CullingMode.Back,
-                selectionModifierBehavior = m_SelectModifierBehavior,
-                rectSelectMode = m_DragSelectRectMode
-            };
+//            m_ScenePickerPreferences = new ScenePickerPreferences()
+//            {
+//                offPointerMultiplier = k_PickingDistance * k_OffPointerMultiplierPercent,
+//                maxPointerDistance = k_PickingDistance,
+//                cullMode = m_BackfaceSelectEnabled ? CullingMode.None : CullingMode.Back,
+//                selectionModifierBehavior = m_SelectModifierBehavior,
+//                rectSelectMode = m_DragSelectRectMode
+//            };
 
 #if !SHORTCUT_MANAGER
             // workaround for old single-key shortcuts
@@ -622,41 +620,22 @@ namespace UnityEditor.ProBuilder
             }
 #endif
 
-            if (selectMode == SelectMode.Object)
+            if (selectMode == SelectMode.Object || Tools.current == Tool.View)
                 return;
 
-            // Check mouse position in scene and determine if we should highlight something
-            if (s_ShowHoverHighlight
-                && m_CurrentEvent.type == EventType.MouseMove
-                && selectMode.IsMeshElementMode())
-            {
-                m_Hovering.CopyTo(m_HoveringPrevious);
-
-                if (GUIUtility.hotControl == 0)
-                    EditorSceneViewPicker.MouseRayHitTest(m_CurrentEvent.mousePosition, selectMode, m_ScenePickerPreferences, m_Hovering);
-                else
-                    m_Hovering.Clear();
-
-                if (!m_Hovering.Equals(m_HoveringPrevious))
-                    SceneView.RepaintAll();
-            }
-
-            if (Tools.current == Tool.View)
-                return;
-
-            // Overrides the toolbar transform tools
-            if (Tools.current != Tool.None && Tools.current != m_CurrentTool)
-                SetTool_Internal(Tools.current);
-
-            Tools.current = Tool.None;
-
-            if (selectMode.IsMeshElementMode() && MeshSelection.selectedVertexCount > 0)
-            {
-                var tool = GetToolForSelectMode(m_CurrentTool, s_SelectMode);
-
-                if (tool != null)
-                    tool.OnSceneGUI(m_CurrentEvent);
-            }
+//            // Overrides the toolbar transform tools
+//            if (Tools.current != Tool.None && Tools.current != m_CurrentTool)
+//                SetTool_Internal(Tools.current);
+//
+//            Tools.current = Tool.None;
+//
+//            if (selectMode.IsMeshElementMode() && MeshSelection.selectedVertexCount > 0)
+//            {
+//                var tool = GetToolForSelectMode(m_CurrentTool, s_SelectMode);
+//
+//                if (tool != null)
+//                    tool.OnSceneGUI(m_CurrentEvent);
+//            }
 
             if (EditorHandleUtility.SceneViewInUse(m_CurrentEvent) || m_CurrentEvent.isKey)
             {
@@ -664,112 +643,112 @@ namespace UnityEditor.ProBuilder
                 return;
             }
 
-            // This prevents us from selecting other objects in the scene,
-            // and allows for the selection of faces / vertices.
-            m_DefaultControl = GUIUtility.GetControlID(FocusType.Passive);
-            HandleUtility.AddDefaultControl(m_DefaultControl);
-
-            if (m_CurrentEvent.type == EventType.MouseDown)
-            {
-                // double clicking object
-                if (m_CurrentEvent.clickCount > 1)
-                {
-                    DoubleClick(m_CurrentEvent);
-                }
-
-                m_InitialMousePosition = m_CurrentEvent.mousePosition;
-                // readyForMouseDrag prevents a bug wherein after ending a drag an errant
-                // MouseDrag event is sent with no corresponding MouseDown/MouseUp event.
-                m_IsReadyForMouseDrag = true;
-            }
-
-            if (m_CurrentEvent.type == EventType.MouseDrag && m_IsReadyForMouseDrag)
-            {
-                if (!m_IsDragging && Vector2.Distance(m_CurrentEvent.mousePosition, m_InitialMousePosition) > k_MouseDragThreshold)
-                {
-                    sceneView.Repaint();
-                    m_IsDragging = true;
-                }
-            }
-
-            if (m_CurrentEvent.type == EventType.Ignore)
-            {
-                if (m_IsDragging)
-                {
-                    m_IsReadyForMouseDrag = false;
-                    m_IsDragging = false;
-                    EditorSceneViewPicker.DoMouseDrag(m_MouseDragRect, selectMode, m_ScenePickerPreferences);
-                }
-
-                if (m_WasDoubleClick)
-                    m_WasDoubleClick = false;
-            }
-
-            if (m_CurrentEvent.type == EventType.MouseUp)
-            {
-                if (m_WasDoubleClick)
-                {
-                    m_WasDoubleClick = false;
-                }
-                else
-                {
-                    if (!m_IsDragging)
-                    {
-                        if (UVEditor.instance)
-                            UVEditor.instance.ResetUserPivot();
-
-                        EditorSceneViewPicker.DoMouseClick(m_CurrentEvent, selectMode, m_ScenePickerPreferences);
-                        UpdateSelection();
-                        SceneView.RepaintAll();
-                    }
-                    else
-                    {
-                        m_IsDragging = false;
-                        m_IsReadyForMouseDrag = false;
-
-                        if (UVEditor.instance)
-                            UVEditor.instance.ResetUserPivot();
-
-                        EditorSceneViewPicker.DoMouseDrag(m_MouseDragRect, selectMode, m_ScenePickerPreferences);
-                    }
-                }
-            }
+//            // This prevents us from selecting other objects in the scene,
+//            // and allows for the selection of faces / vertices.
+//            m_DefaultControl = GUIUtility.GetControlID(FocusType.Passive);
+//            HandleUtility.AddDefaultControl(m_DefaultControl);
+//
+//            if (m_CurrentEvent.type == EventType.MouseDown)
+//            {
+//                // double clicking object
+//                if (m_CurrentEvent.clickCount > 1)
+//                {
+//                    DoubleClick(m_CurrentEvent);
+//                }
+//
+//                m_InitialMousePosition = m_CurrentEvent.mousePosition;
+//                // readyForMouseDrag prevents a bug wherein after ending a drag an errant
+//                // MouseDrag event is sent with no corresponding MouseDown/MouseUp event.
+//                m_IsReadyForMouseDrag = true;
+//            }
+//
+//            if (m_CurrentEvent.type == EventType.MouseDrag && m_IsReadyForMouseDrag)
+//            {
+//                if (!m_IsDragging && Vector2.Distance(m_CurrentEvent.mousePosition, m_InitialMousePosition) > k_MouseDragThreshold)
+//                {
+//                    sceneView.Repaint();
+//                    m_IsDragging = true;
+//                }
+//            }
+//
+//            if (m_CurrentEvent.type == EventType.Ignore)
+//            {
+//                if (m_IsDragging)
+//                {
+//                    m_IsReadyForMouseDrag = false;
+//                    m_IsDragging = false;
+//                    EditorSceneViewPicker.DoMouseDrag(m_MouseDragRect, selectMode, m_ScenePickerPreferences);
+//                }
+//
+//                if (m_WasDoubleClick)
+//                    m_WasDoubleClick = false;
+//            }
+//
+//            if (m_CurrentEvent.type == EventType.MouseUp)
+//            {
+//                if (m_WasDoubleClick)
+//                {
+//                    m_WasDoubleClick = false;
+//                }
+//                else
+//                {
+//                    if (!m_IsDragging)
+//                    {
+//                        if (UVEditor.instance)
+//                            UVEditor.instance.ResetUserPivot();
+//
+//                        EditorSceneViewPicker.DoMouseClick(m_CurrentEvent, selectMode, m_ScenePickerPreferences);
+//                        UpdateSelection();
+//                        SceneView.RepaintAll();
+//                    }
+//                    else
+//                    {
+//                        m_IsDragging = false;
+//                        m_IsReadyForMouseDrag = false;
+//
+//                        if (UVEditor.instance)
+//                            UVEditor.instance.ResetUserPivot();
+//
+//                        EditorSceneViewPicker.DoMouseDrag(m_MouseDragRect, selectMode, m_ScenePickerPreferences);
+//                    }
+//                }
+//            }
         }
 
         void DoubleClick(Event e)
         {
-            var mesh = EditorSceneViewPicker.DoMouseClick(m_CurrentEvent, selectMode, m_ScenePickerPreferences);
-
-            if (mesh != null)
-            {
-                if (selectMode.ContainsFlag(SelectMode.Edge | SelectMode.TextureEdge))
-                {
-                    if (e.shift)
-                        EditorUtility.ShowNotification(EditorToolbarLoader.GetInstance<Actions.SelectEdgeRing>().DoAction());
-                    else
-                        EditorUtility.ShowNotification(EditorToolbarLoader.GetInstance<Actions.SelectEdgeLoop>().DoAction());
-                }
-                else if (selectMode.ContainsFlag(SelectMode.Face | SelectMode.TextureFace))
-                {
-                    if ((e.modifiers & (EventModifiers.Control | EventModifiers.Shift)) ==
-                        (EventModifiers.Control | EventModifiers.Shift))
-                        Actions.SelectFaceRing.MenuRingAndLoopFaces(MeshSelection.topInternal);
-                    else if (e.control)
-                        EditorUtility.ShowNotification(EditorToolbarLoader.GetInstance<Actions.SelectFaceRing>().DoAction());
-                    else if (e.shift)
-                        EditorUtility.ShowNotification(EditorToolbarLoader.GetInstance<Actions.SelectFaceLoop>().DoAction());
-                    else
-                        mesh.SetSelectedFaces(mesh.facesInternal);
-                }
-                else
-                {
-                    mesh.SetSelectedFaces(mesh.facesInternal);
-                }
-
-                UpdateSelection();
-                SceneView.RepaintAll();
-                m_WasDoubleClick = true;
-            }
+//            var mesh = EditorSceneViewPicker.DoMouseClick(m_CurrentEvent, selectMode, m_ScenePickerPreferences);
+//
+//            if (mesh != null)
+//            {
+//                if (selectMode.ContainsFlag(SelectMode.Edge | SelectMode.TextureEdge))
+//                {
+//                    if (e.shift)
+//                        EditorUtility.ShowNotification(EditorToolbarLoader.GetInstance<Actions.SelectEdgeRing>().DoAction());
+//                    else
+//                        EditorUtility.ShowNotification(EditorToolbarLoader.GetInstance<Actions.SelectEdgeLoop>().DoAction());
+//                }
+//                else if (selectMode.ContainsFlag(SelectMode.Face | SelectMode.TextureFace))
+//                {
+//                    if ((e.modifiers & (EventModifiers.Control | EventModifiers.Shift)) ==
+//                        (EventModifiers.Control | EventModifiers.Shift))
+//                        Actions.SelectFaceRing.MenuRingAndLoopFaces(MeshSelection.topInternal);
+//                    else if (e.control)
+//                        EditorUtility.ShowNotification(EditorToolbarLoader.GetInstance<Actions.SelectFaceRing>().DoAction());
+//                    else if (e.shift)
+//                        EditorUtility.ShowNotification(EditorToolbarLoader.GetInstance<Actions.SelectFaceLoop>().DoAction());
+//                    else
+//                        mesh.SetSelectedFaces(mesh.facesInternal);
+//                }
+//                else
+//                {
+//                    mesh.SetSelectedFaces(mesh.facesInternal);
+//                }
+//
+//                UpdateSelection();
+//                SceneView.RepaintAll();
+//                m_WasDoubleClick = true;
+//            }
         }
 
         void DrawHandleGUI(SceneView sceneView)
@@ -777,22 +756,22 @@ namespace UnityEditor.ProBuilder
             if (sceneView != SceneView.lastActiveSceneView)
                 return;
 
-            if (m_CurrentEvent.type == EventType.Repaint
-                && !SceneDragAndDropListener.isDragging
-                && m_Hovering != null
-                && GUIUtility.hotControl == 0
-                && HandleUtility.nearestControl == m_DefaultControl
-                && selectMode.IsMeshElementMode())
-            {
-                try
-                {
-                    EditorMeshHandles.DrawSceneSelection(m_Hovering);
-                }
-                catch
-                {
-                    // this happens on undo, when c++ object is destroyed but c# side thinks it's still alive
-                }
-            }
+//            if (m_CurrentEvent.type == EventType.Repaint
+//                && !SceneDragAndDropListener.isDragging
+//                && m_Hovering != null
+//                && GUIUtility.hotControl == 0
+//                && HandleUtility.nearestControl == m_DefaultControl
+//                && selectMode.IsMeshElementMode())
+//            {
+//                try
+//                {
+//                    EditorMeshHandles.DrawSceneSelection(m_Hovering);
+//                }
+//                catch
+//                {
+//                    // this happens on undo, when c++ object is destroyed but c# side thinks it's still alive
+//                }
+//            }
 
             using (new HandleGUI())
             {
@@ -1083,7 +1062,7 @@ namespace UnityEditor.ProBuilder
             foreach (ProBuilderMesh pb in selection)
                 pb.ClearSelection();
 
-            m_Hovering.Clear();
+//            m_Hovering.Clear();
         }
 
         /// <summary>
@@ -1128,7 +1107,7 @@ namespace UnityEditor.ProBuilder
 
         void OnObjectSelectionChanged()
         {
-            m_Hovering.Clear();
+//            m_Hovering.Clear();
             UpdateSelection();
             SetOverrideWireframe(true);
         }

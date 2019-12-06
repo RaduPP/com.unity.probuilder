@@ -1,7 +1,9 @@
+#define DEBUG_HANDLES
+
 using System;
 using System.Collections.Generic;
-using System.Linq;
 using System.Reflection;
+using UnityEditor.EditorTools;
 using UnityEngine;
 using UnityEngine.ProBuilder;
 using UnityEngine.ProBuilder.MeshOperations;
