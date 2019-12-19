@@ -44,10 +44,12 @@ namespace UnityEditor.ProBuilder
         bool m_WasDoubleClick;
         Rect m_MouseDragRect;
 
-        static SelectMode selectMode { get { return ProBuilderEditor.selectMode; } }
+        SelectMode m_SelectMode;
 
-        public SelectionTool()
+        public SelectionTool(SelectMode mode)
         {
+            m_SelectMode = mode;
+
             m_ScenePickerPreferences = new ScenePickerPreferences()
             {
                 offPointerMultiplier = k_PickingDistance * k_OffPointerMultiplierPercent,
@@ -122,7 +124,7 @@ namespace UnityEditor.ProBuilder
                     if (UVEditor.instance)
                         UVEditor.instance.ResetUserPivot();
 
-                    EditorSceneViewPicker.DoMouseClick(evt, selectMode, m_ScenePickerPreferences);
+                    EditorSceneViewPicker.DoMouseClick(evt, m_SelectMode, m_ScenePickerPreferences);
                     ProBuilderEditor.Refresh();
                 }
                 else
@@ -133,25 +135,25 @@ namespace UnityEditor.ProBuilder
                     if (UVEditor.instance)
                         UVEditor.instance.ResetUserPivot();
 
-                    EditorSceneViewPicker.DoMouseDrag(m_MouseDragRect, selectMode, m_ScenePickerPreferences);
+                    EditorSceneViewPicker.DoMouseDrag(m_MouseDragRect, m_SelectMode, m_ScenePickerPreferences);
                 }
             }
         }
 
         void HandleDoubleClick(Event evt)
         {
-            var mesh = EditorSceneViewPicker.DoMouseClick(evt, selectMode, m_ScenePickerPreferences);
+            var mesh = EditorSceneViewPicker.DoMouseClick(evt, m_SelectMode, m_ScenePickerPreferences);
 
             if (mesh != null)
             {
-                if (selectMode.ContainsFlag(SelectMode.Edge | SelectMode.TextureEdge))
+                if (m_SelectMode.ContainsFlag(SelectMode.Edge | SelectMode.TextureEdge))
                 {
                     if (evt.shift)
                         EditorUtility.ShowNotification(EditorToolbarLoader.GetInstance<Actions.SelectEdgeRing>().DoAction());
                     else
                         EditorUtility.ShowNotification(EditorToolbarLoader.GetInstance<Actions.SelectEdgeLoop>().DoAction());
                 }
-                else if (selectMode.ContainsFlag(SelectMode.Face | SelectMode.TextureFace))
+                else if (m_SelectMode.ContainsFlag(SelectMode.Face | SelectMode.TextureFace))
                 {
                     if ((evt.modifiers & (EventModifiers.Control | EventModifiers.Shift)) ==
                         (EventModifiers.Control | EventModifiers.Shift))
@@ -179,7 +181,7 @@ namespace UnityEditor.ProBuilder
             {
                 m_IsReadyForMouseDrag = false;
                 m_IsDragging = false;
-                EditorSceneViewPicker.DoMouseDrag(m_MouseDragRect, selectMode, m_ScenePickerPreferences);
+                EditorSceneViewPicker.DoMouseDrag(m_MouseDragRect, m_SelectMode, m_ScenePickerPreferences);
             }
 
             if (m_WasDoubleClick)
@@ -191,24 +193,23 @@ namespace UnityEditor.ProBuilder
             if(m_IsReadyForMouseDrag)
             {
                 if (!m_IsDragging && Vector2.Distance(evt.mousePosition, m_InitialMousePosition) > k_MouseDragThreshold)
-                {
                     m_IsDragging = true;
-                    SceneView.RepaintAll();
-                }
             }
+
+            if(m_IsDragging)
+                SceneView.RepaintAll();
         }
 
         void HandleSelectionPreview(Event evt)
         {
+            // todo this should be done on a thread
             // Check mouse position in scene and determine if we should highlight something
-            if (s_ShowHoverHighlight
-                && evt.type == EventType.MouseMove)
-//                && selectMode.IsMeshElementMode())
+            if (s_ShowHoverHighlight)
             {
                 m_Hovering.CopyTo(m_HoveringPrevious);
 
                 if (GUIUtility.hotControl == 0)
-                    EditorSceneViewPicker.MouseRayHitTest(evt.mousePosition, selectMode, m_ScenePickerPreferences, m_Hovering);
+                    EditorSceneViewPicker.MouseRayHitTest(evt.mousePosition, m_SelectMode, m_ScenePickerPreferences, m_Hovering);
                 else
                     m_Hovering.Clear();
 
@@ -236,13 +237,13 @@ namespace UnityEditor.ProBuilder
 
             if (m_IsDragging)
             {
+                Handles.BeginGUI();
                 // Always draw from lowest to largest values
                 var start = Vector2.Min(m_InitialMousePosition, evt.mousePosition);
                 var end = Vector2.Max(m_InitialMousePosition, evt.mousePosition);
-
                 m_MouseDragRect = new Rect(start.x, start.y, end.x - start.x, end.y - start.y);
-
                 Styles.selectionRect.Draw(m_MouseDragRect, false, false, false, false);
+                Handles.EndGUI();
             }
         }
     }

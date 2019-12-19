@@ -1,7 +1,9 @@
+using System;
+
 namespace UnityEditor.ProBuilder
 {
-    public class SelectionGizmos
+    public class SelectionGizmos : IDisposable
     {
-        
+        public void Dispose() { }
     }
 }

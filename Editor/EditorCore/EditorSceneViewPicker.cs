@@ -227,8 +227,7 @@ namespace UnityEditor.ProBuilder
                     MeshSelection.AddToSelection(candidateNewActiveObject);
                 }
 
-
-            return mesh;
+                return mesh;
             }
 
             return null;
